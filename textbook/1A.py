@@ -15,12 +15,10 @@
 #
 # CATG GCAT
 
-import os
-#infile = open(os.path.expanduser('~/Downloads/rosalind_1a.txt'), 'r')
-infile = open(os.path.expanduser('~/Downloads/stepic_dataset.txt'), 'r')
-sequence = infile.readline().strip()
-k = int(infile.readline().strip())
-infile.close()
+import inout 	# my module for handling Rosalind's file I/O
+
+sequence = inout.infilelines[0].strip()
+k = int(inout.infilelines[1].strip())
 
 kmer_counts = {}
 max_kmer_count = 0
@@ -39,7 +37,4 @@ for idx in range(len(sequence) - k + 1):
 	elif count == max_kmer_count:
 		max_kmers = max_kmers + " " + kmer
 
-#outfile = open('rosalind_1a_out.txt', 'w')
-outfile = open('stepic_dataset_out.txt', 'w')
-outfile.write(max_kmers)
-outfile.close()
+inout.output(max_kmers)
