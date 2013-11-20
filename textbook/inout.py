@@ -4,9 +4,15 @@ import os
 infilename = os.path.expanduser(sys.argv[1])
 outfilename = os.path.expanduser(sys.argv[2])
 
-with open(infilename, 'r') as infile:
-	infilelines = infile.readlines()
-	
-def output(outstr):
-	with open(outfilename, 'w') as outfile:
+def readlines(filename):
+	with open(os.path.expanduser(filename), 'r') as infile:
+		return infile.readlines()
+
+def writelines(filename, outstr):
+	with open(filename, 'w') as outfile:
 		outfile.write(outstr)
+
+def output(outstr):
+	writelines(outfilename, outstr)
+	
+infilelines = readlines(infilename)
