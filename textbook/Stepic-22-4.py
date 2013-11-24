@@ -15,8 +15,6 @@
 # Sample Output:
 #     186-128-113 186-113-128 128-186-113 128-113-186 113-186-128 113-128-186
 
-#W IL KQ
-
 import inout
 import peptide
 
