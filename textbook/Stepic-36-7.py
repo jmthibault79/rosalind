@@ -18,7 +18,6 @@
 #     ATA ATT GTT TTT
      
 import inout
-import collections
 
 k,d = map(int, inout.infilelines[0].strip().split(' '))
 dna_lines = map(str.strip, inout.infilelines[1:])
