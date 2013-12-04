@@ -16,6 +16,7 @@
 #     CCGAG
      
 import inout
+import common
 
 sequence = inout.infilelines[0].strip() 
 k = int(inout.infilelines[1].strip())
@@ -28,19 +29,6 @@ matrix = []
 for pos in range(3, k+3):
 	matrix.append(map(float, inout.infilelines[pos].strip().split(' ')))
 
-def probability(kmer):
-	total = 0.0
-	for idx, base in enumerate(kmer):
-		total = total + matrix[idx][bases[base]]
-	return total
-
-best_kmer = ''
-best_kmer_probability = 0
-for idx in range(len(sequence) - k + 1):
-	kmer = sequence[idx:idx+k]
-	prob = probability(kmer)
-	if prob > best_kmer_probability:
- 		best_kmer = kmer
- 		best_kmer_probability = prob
- 		
+best_kmer = common.profile_most_probable_kmer(sequence, k, bases, matrix)
+	
 inout.output(best_kmer)
