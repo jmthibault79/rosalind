@@ -1,20 +1,84 @@
 # Functions for Stepic assignments
 
 # 39-3
-def profile_probability(kmer, bases, profile):
+# 39-5
+# Find the probability of a kmer matching a profile matrix
+def profile_probability(kmer, profile):
 	total = 0.0
 	for idx, base in enumerate(kmer):
-		total = total + profile[idx][bases[base]]
+		if base in profile[idx]:
+			total = total + profile[idx][base]
+		else:
+			return 0.0
 	return total
+ 	
+# 39-3
+# 39-5 	
+# Enumerate all kmers in a sequence
+def all_kmers(sequence, k):
+	for i in range(len(sequence)-k+1):
+		yield sequence[i:i+k]
 
 # 39-3
-def profile_most_probable_kmer(sequence, k, bases, profile):
-	best_kmer = ''
+# 39-5
+# Find the kmer in a sequence that best matches a profile matrix
+def profile_most_probable_kmer(sequence, k, profile):
+	best_kmer = sequence[:k]
 	best_kmer_probability = 0
-	for idx in range(len(sequence) - k + 1):
-		kmer = sequence[idx:idx+k]
-		prob = profile_probability(kmer, bases, profile)
+	for kmer in all_kmers(sequence, k):
+		prob = profile_probability(kmer, profile)
 		if prob > best_kmer_probability:
  			best_kmer = kmer
  			best_kmer_probability = prob
  	return best_kmer
+
+# 39-5
+# Count the number of each base for corresponding positions of a set of kmers
+def count_matrix(motifs):
+	from collections import Counter
+	k = len(motifs[0])
+	matrix = []
+	for base_position in range(k):
+		column = []
+		for motif in motifs:
+			column.append(motif[base_position])
+		matrix.append(Counter(column).most_common())
+	return matrix
+
+# 39-5
+# Count the number of differences among a set of kmers
+def score_motifs(motifs):
+	score = 0
+	cmatrix = count_matrix(motifs)
+	for base_position in cmatrix:
+		for base_count_pair in base_position[1:]:
+			score = score + base_count_pair[1]
+	return score
+	
+# 39-5
+# Convert a set of motifs to a profile matrix
+def profile_matrix(motifs):
+	kmer_count = len(motifs)
+	cmatrix = count_matrix(motifs)
+	matrix = []
+	for base_position in cmatrix:
+		matrix.append({base_count_pair[0]: float(base_count_pair[1]) / kmer_count for base_count_pair in base_position})
+	return matrix
+
+# 39-5
+def greedy_motif_search(sequences, k, t):
+	best_motifs = [x[:k] for x in sequences]
+	best_motif_score = 100000000
+	
+	for kmer in all_kmers(sequences[0], k):
+		motifs = [kmer]
+		for i in range(1, t):
+			profile = profile_matrix(motifs)
+			motifs.append(profile_most_probable_kmer(sequences[i], k, profile))
+		s = score_motifs(motifs)
+		if s < best_motif_score:
+			best_motifs = motifs
+			best_motif_score = s
+	return best_motifs
+
+	

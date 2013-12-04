@@ -20,15 +20,15 @@ import common
 
 sequence = inout.infilelines[0].strip() 
 k = int(inout.infilelines[1].strip())
+bases = inout.infilelines[2].strip().split(' ')
 
-bases = {}
-for idx, base in enumerate(inout.infilelines[2].strip().split(' ')):
-	bases[base] = idx
-
-matrix = []
+profile_matrix = []
 for pos in range(3, k+3):
-	matrix.append(map(float, inout.infilelines[pos].strip().split(' ')))
+	probabilities = map(float, inout.infilelines[pos].strip().split(' '))
+	profile_matrix.append(dict(zip(bases, probabilities)))
+	
+print(profile_matrix)
 
-best_kmer = common.profile_most_probable_kmer(sequence, k, bases, matrix)
+best_kmer = common.profile_most_probable_kmer(sequence, k, profile_matrix)
 	
 inout.output(best_kmer)
