@@ -7,6 +7,7 @@ DNA_BASES = ['A', 'C', 'G', 'T']
 # 39-5
 # 40-9
 # 41-4
+# 43-4
 # Find the probability of a kmer matching a profile matrix
 def profile_probability(kmer, profile):
 	total = 1.0
@@ -44,6 +45,7 @@ def profile_most_probable_kmer(sequence, k, profile):
 # 39-5
 # 40-9
 # 41-4
+# 43-4
 # Count the number of each base for corresponding positions of a set of kmers
 def count_matrix(motifs):
 	from collections import Counter
@@ -60,6 +62,7 @@ def count_matrix(motifs):
 # 39-5
 # 40-9
 # 41-4
+# 43-4
 # Count the number of differences among a set of kmers
 def score_motifs(motifs):
 	score = 0
@@ -97,6 +100,7 @@ def greedy_motif_search(sequences, k, t):
 	
 # 40-9
 # 41-4
+# 43-4
 # Convert a set of motifs to a profile matrix
 def profile_matrix_with_pseudocounts(motifs):
 	kmer_count = len(motifs)
@@ -159,4 +163,59 @@ def repeated_randomized_motif_search(sequences, k, t, n):
 		if score < best_motif_score:
 			best_motifs = motifs
 			best_motif_score = score
+	return best_motifs			
+
+# 43-4
+# Find a kmer in a sequence that probabilistically matches a profile matrix
+def profile_random_kmer(sequence, k, profile):
+	from random import uniform
+	
+	total_probability = 0
+	probability_pairs = []
+	for kmer in all_kmers(sequence, k):
+		prob = profile_probability(kmer, profile)
+		total_probability += prob
+		probability_pairs.append([prob, kmer])
+	
+	randval = uniform(0, total_probability)
+	probability_acc = 0 
+	chosen_kmer = ''
+	while probability_acc < randval:
+		prob, chosen_kmer = probability_pairs.pop()
+		probability_acc += prob
+	
+ 	return chosen_kmer
+
+# 43-4
+def gibbs_sampler(sequences, k, t, n):
+	from random import choice, randrange
+	
+	best_motif_score = 100000000
+	best_motifs = []
+	for sequence in sequences:
+		best_motifs.append(choice(list(all_kmers(sequence, k))))
+	
+	motifs = best_motifs
+	for i in range(n):
+		j = randrange(len(sequences))
+		motifs.pop(j)
+		profile = profile_matrix_with_pseudocounts(motifs)
+		motifs.insert(j, profile_random_kmer(sequences[j], k, profile))
+		score = score_motifs(motifs)
+		if score < best_motif_score:
+			best_motifs = motifs
+			best_motif_score = score
+	return best_motif_score, best_motifs
+
+# 43-4
+def repeated_gibbs_sampler(sequences, k, t, n, runcount):
+
+	best_motif_score = 100000000
+	best_motifs = []
+	for i in range(runcount):
+		score, motifs = gibbs_sampler(sequences, k, t, n)
+		if score < best_motif_score:
+			best_motifs = motifs
+			best_motif_score = score
+			print (score, best_motifs)
 	return best_motifs			
