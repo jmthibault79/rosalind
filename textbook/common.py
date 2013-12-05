@@ -9,10 +9,10 @@ DNA_BASES = ['A', 'C', 'G', 'T']
 # 41-4
 # Find the probability of a kmer matching a profile matrix
 def profile_probability(kmer, profile):
-	total = 0.0
+	total = 1.0
 	for idx, base in enumerate(kmer):
 		if base in profile[idx]:
-			total = total + profile[idx][base]
+			total = total * profile[idx][base]
 		else:
 			return 0.0
 	return total
@@ -107,9 +107,9 @@ def profile_matrix_with_pseudocounts(motifs):
 		profile_dict = {}
 		for base in DNA_BASES:
 			if base in count_dict:
-				profile_dict[base] = (count_dict[base] + 1.0) / kmer_count
+				profile_dict[base] = (count_dict[base] + 1.0) / (2 * kmer_count)
 			else:
-				profile_dict[base] = 1.0 / kmer_count
+				profile_dict[base] = 1.0 /  (2 * kmer_count)
 		matrix.append(profile_dict)
 	return matrix
 
@@ -160,4 +160,3 @@ def repeated_randomized_motif_search(sequences, k, t, n):
 			best_motifs = motifs
 			best_motif_score = score
 	return best_motifs			
-	

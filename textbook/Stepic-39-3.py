@@ -27,8 +27,6 @@ for pos in range(3, k+3):
 	probabilities = map(float, inout.infilelines[pos].strip().split(' '))
 	profile_matrix.append(dict(zip(bases, probabilities)))
 	
-print(profile_matrix)
-
 best_kmer = common.profile_most_probable_kmer(sequence, k, profile_matrix)
 	
 inout.output(best_kmer)
