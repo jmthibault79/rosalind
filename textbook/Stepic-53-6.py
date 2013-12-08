@@ -21,7 +21,7 @@ import common
 k = int(inout.infilelines[0].strip())
 sequence = inout.infilelines[1].strip()
 
-graph = common.debruijn_graph(common.all_kmers_list(sequence, k-1))		
+graph = common.ordered_debruijn_graph(common.all_kmers(sequence, k))		
 
 graph_strs = []
 for k,v in graph.iteritems():
