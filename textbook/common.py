@@ -241,11 +241,13 @@ def overlap_graph(sequences):
 	return graph
 
 # 53-6
+# 54-7
 def debruijn_to_str(source, sinks):
 	return "{} -> {}".format(source, ','.join(sinks))
 
 # 53-6
-def ordered_debruijn_graph(sequences):
+# 54-7
+def debruijn_graph(sequences):
 	graph = {}
 	for sequence in sequences:
 		source, sink = sequence[:-1], sequence[1:]
