@@ -22,6 +22,7 @@ def profile_probability(kmer, profile):
 # 39-5 	
 # 40-9
 # 41-4
+# 51-3
 # Enumerate all kmers in a sequence
 def all_kmers(sequence, k):
 	for i in range(len(sequence)-k+1):
