@@ -220,3 +220,20 @@ def repeated_gibbs_sampler(sequences, k, t, n, runcount):
 			best_motif_score = score
 			print (score, best_motifs)
 	return best_motifs			
+
+# 52-7
+def overlap(a, b):
+	return a[1:] == b[:-1]
+	
+# 52-7
+def overlap_to_str(o):
+	return "{} -> {}".format(*o)
+
+# 52-7
+def overlap_graph(sequences):
+	graph = []
+	for s1 in sequences:
+		for s2 in sequences:
+			if overlap(s1, s2):
+				graph.append([s1, s2])
+	return graph
