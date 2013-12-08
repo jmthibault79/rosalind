@@ -23,10 +23,16 @@ def profile_probability(kmer, profile):
 # 40-9
 # 41-4
 # 51-3
+# 53-6
 # Enumerate all kmers in a sequence
 def all_kmers(sequence, k):
 	for i in range(len(sequence)-k+1):
 		yield sequence[i:i+k]
+
+# 53-6
+# Enumerate all kmers in a sequence
+def all_kmers_list(sequence, k):
+	return list(all_kmers(sequence, k))
 
 # 39-3
 # 39-5
@@ -222,6 +228,7 @@ def repeated_gibbs_sampler(sequences, k, t, n, runcount):
 	return best_motifs			
 
 # 52-7
+# 53-6
 def overlap(a, b):
 	return a[1:] == b[:-1]
 	
@@ -230,10 +237,37 @@ def overlap_to_str(o):
 	return "{} -> {}".format(*o)
 
 # 52-7
+# construct an overlap graph from arbitrary fragments
 def overlap_graph(sequences):
 	graph = []
 	for s1 in sequences:
 		for s2 in sequences:
 			if overlap(s1, s2):
 				graph.append([s1, s2])
+	return graph
+
+# 53-6
+# construct an overlap graph from known-adjacent fragments
+def ordered_overlap_graph(sequences):
+	graph = []
+	source = sequences.pop(0)
+	for sink in sequences:
+		graph.append([source, sink])
+		source = sink
+	return graph
+
+# 53-6
+def debruijn_to_str(source, sinks):
+	return "{} -> {}".format(source, ','.join(sinks))
+
+# 53-6
+def debruijn_graph(sequences):
+	ograph = ordered_overlap_graph(sequences)
+	graph = {}
+	for o in ograph:
+		source, sink = o
+		if source in graph:
+			graph[source].add(sink)
+		else:
+			graph[source] = set([sink])
 	return graph
