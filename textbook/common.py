@@ -256,3 +256,59 @@ def debruijn_graph(sequences):
 		else:
 			graph[source] = set([sink])
 	return graph
+
+# 57-2
+def parse_graph_edges(edge_strs):
+	graph = {}
+	for edge_str in edge_strs:
+		source, dummy, sink_str = edge_str.split(' ')
+		sinks = sink_str.split(',')
+		graph[source] = set(sinks)
+	return graph
+	
+# 57-2
+def find_cycle_starting_at(graph, startnode):
+	from random import sample
+	
+	cycle = [startnode]
+	node = startnode
+	complete = False
+	while not complete:
+		sinks = graph[node]
+		next = sample(sinks, 1)[0]
+		if len(sinks) > 1:
+			graph[node] = sinks - set([next])
+		else:
+			del(graph[node])
+		cycle.append(next)
+		node = next
+		complete = (node == startnode)
+	return cycle, graph
+
+# 57-2
+def find_cycle(graph):
+	from random import choice
+	
+	startnode = choice(graph.keys())
+	
+	return find_cycle_starting_at(graph, startnode)
+
+# 57-2
+def combine_cycles(cycle, index, new_cycle):
+	cycle = cycle[:index] + new_cycle + cycle[index+1:]
+	return cycle
+
+# 57-2		
+def find_eulerian_cycle(graph):
+	cycle, remaining_graph = find_cycle(graph)
+	while remaining_graph:
+		for index, new_start in enumerate(cycle):
+			if new_start in remaining_graph:
+				new_cycle, remaining_graph = find_cycle_starting_at(remaining_graph, new_start)
+				cycle = combine_cycles(cycle, index, new_cycle)
+				break
+		else:
+			raise Exception("Cannot find any nodes from {} in remaining graph {}".format(cycle, remaining_graph))
+	return cycle
+		
+		
