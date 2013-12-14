@@ -269,6 +269,7 @@ def parse_graph_edges(edge_strs):
 	
 # 57-2
 # 57-5
+# 57-6		
 def find_cycle_starting_at(graph, startnode):
 	from random import sample
 	
@@ -295,6 +296,7 @@ def find_cycle(graph):
 
 # 57-2
 # 57-5
+# 57-6		
 def combine_cycles(cycle, index, new_cycle):
 	cycle = cycle[:index] + new_cycle + cycle[index+1:]
 	return cycle
@@ -313,6 +315,7 @@ def find_eulerian_cycle(graph):
 	return cycle
 
 # 57-5
+# 57-6		
 def path_degrees(graph):
 	indegree = {}
 	outdegree = {}
@@ -332,6 +335,7 @@ def path_degrees(graph):
 	return indegree, outdegree
 
 # 57-5		
+# 57-6		
 def find_eulerian_endpoints(graph):
 	indegree, outdegree = path_degrees(graph)
 	startnode, endnode = None, None
@@ -355,6 +359,7 @@ def find_eulerian_endpoints(graph):
 	return startnode, endnode
 
 # 57-5		
+# 57-6		
 def find_eulerian_path(graph):
 	startnode, endnode = find_eulerian_endpoints(graph)
 	if endnode in graph:
@@ -372,5 +377,19 @@ def find_eulerian_path(graph):
 		else:
 			raise Exception("Cannot find any nodes from {} in remaining graph {}".format(cycle, remaining_graph))
 	return cycle[:-1]
+
+# 57-6
+def overlap_n(a, b, n):
+	return a[-n:] == b[:n]
+
+# 57-6		
+def assemble_path(path):
+	sequence = path[0]
+	for kmer in path[1:]:
+		if overlap_n(sequence, kmer, len(kmer)-1):
+			sequence += kmer[-1]
+		else:
+			raise Exception('kmer {} does not extend existing sequence {}'.format(kmer, sequence))
+	return sequence
 		
-		
+	
