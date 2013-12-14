@@ -270,6 +270,7 @@ def parse_graph_edges(edge_strs):
 # 57-2
 # 57-5
 # 57-6		
+# 57-10
 def find_cycle_starting_at(graph, startnode):
 	from random import sample
 	
@@ -289,6 +290,7 @@ def find_cycle_starting_at(graph, startnode):
 	return cycle, graph
 
 # 57-2
+# 57-10
 def find_cycle(graph):
 	from random import choice	
 	startnode = choice(graph.keys())
@@ -297,11 +299,13 @@ def find_cycle(graph):
 # 57-2
 # 57-5
 # 57-6		
+# 57-10
 def combine_cycles(cycle, index, new_cycle):
 	cycle = cycle[:index] + new_cycle + cycle[index+1:]
 	return cycle
 
 # 57-2		
+# 57-10
 def find_eulerian_cycle(graph):
 	cycle, remaining_graph = find_cycle(graph)
 	while remaining_graph:
@@ -379,10 +383,12 @@ def find_eulerian_path(graph):
 	return cycle[:-1]
 
 # 57-6
+# 57-10
 def overlap_n(a, b, n):
 	return a[-n:] == b[:n]
 
 # 57-6		
+# 57-10		
 def assemble_path(path):
 	sequence = path[0]
 	for kmer in path[1:]:
@@ -391,5 +397,29 @@ def assemble_path(path):
 		else:
 			raise Exception('kmer {} does not extend existing sequence {}'.format(kmer, sequence))
 	return sequence
+	
+# 57-10
+def universal_extend(inlist):
+	outlist = []
+	for elem in inlist:
+		outlist.append(elem + '0')
+		outlist.append(elem + '1')
+	return outlist		
+
+# 57-10
+def universal_extend_n(n):
+	counter = n
+	outlist = ['']
+	while counter > 0:
+		outlist = universal_extend(outlist)
+		counter -= 1
+	return outlist  
+
+# 57-10
+def k_universal_graph(k):
+	graph = {}
+	for node in universal_extend_n(k-1):
+		graph[node] = set(universal_extend([node[1:]]))
+	return graph
 		
 	
