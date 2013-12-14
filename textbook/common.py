@@ -258,6 +258,7 @@ def debruijn_graph(sequences):
 	return graph
 
 # 57-2
+# 57-5
 def parse_graph_edges(edge_strs):
 	graph = {}
 	for edge_str in edge_strs:
@@ -267,6 +268,7 @@ def parse_graph_edges(edge_strs):
 	return graph
 	
 # 57-2
+# 57-5
 def find_cycle_starting_at(graph, startnode):
 	from random import sample
 	
@@ -287,13 +289,12 @@ def find_cycle_starting_at(graph, startnode):
 
 # 57-2
 def find_cycle(graph):
-	from random import choice
-	
+	from random import choice	
 	startnode = choice(graph.keys())
-	
 	return find_cycle_starting_at(graph, startnode)
 
 # 57-2
+# 57-5
 def combine_cycles(cycle, index, new_cycle):
 	cycle = cycle[:index] + new_cycle + cycle[index+1:]
 	return cycle
@@ -310,5 +311,66 @@ def find_eulerian_cycle(graph):
 		else:
 			raise Exception("Cannot find any nodes from {} in remaining graph {}".format(cycle, remaining_graph))
 	return cycle
+
+# 57-5
+def path_degrees(graph):
+	indegree = {}
+	outdegree = {}
+	
+	for source in graph:
+		if source not in indegree:
+			indegree[source] = 0
+		outdegree[source] = len(graph[source])
+		for sink in graph[source]:
+			if sink in indegree:
+				indegree[sink] += 1
+			else:
+				indegree[sink] = 1
+			if sink not in outdegree:
+				outdegree[sink] = 0
+	
+	return indegree, outdegree
+
+# 57-5		
+def find_eulerian_endpoints(graph):
+	indegree, outdegree = path_degrees(graph)
+	startnode, endnode = None, None
+	
+	for node in indegree:
+		ins, outs = indegree[node], outdegree[node]
+		if outs == ins + 1:
+			if startnode == None:
+				startnode = node
+			else:
+				raise Exception("Eulerian Path would have two start nodes: {} and {}".format(startnode, node))
+		elif ins == outs + 1:
+			if endnode == None:
+				endnode = node
+			else:
+				raise Exception("Eulerian Path would have two end nodes: {} and {}".format(endnode, node))
+				
+	if startnode == None or endnode == None:
+		raise Exception("Could not find Eulerian Path endpoints")
+		
+	return startnode, endnode
+
+# 57-5		
+def find_eulerian_path(graph):
+	startnode, endnode = find_eulerian_endpoints(graph)
+	if endnode in graph:
+		graph[endnode].add(startnode)
+	else:
+		graph[endnode] = set([startnode])
+	
+	cycle, remaining_graph = find_cycle_starting_at(graph, startnode)
+	while remaining_graph:
+		for index, new_start in enumerate(cycle):
+			if new_start in remaining_graph:
+				new_cycle, remaining_graph = find_cycle_starting_at(remaining_graph, new_start)
+				cycle = combine_cycles(cycle, index, new_cycle)
+				break
+		else:
+			raise Exception("Cannot find any nodes from {} in remaining graph {}".format(cycle, remaining_graph))
+	return cycle[:-1]
 		
 		
