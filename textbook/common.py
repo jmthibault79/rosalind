@@ -271,6 +271,7 @@ def parse_graph_edges(edge_strs):
 # 57-5
 # 57-6		
 # 57-10
+# 58-14	
 def find_cycle_starting_at(graph, startnode):
 	from random import sample
 	
@@ -300,6 +301,7 @@ def find_cycle(graph):
 # 57-5
 # 57-6		
 # 57-10
+# 58-14	
 def combine_cycles(cycle, index, new_cycle):
 	cycle = cycle[:index] + new_cycle + cycle[index+1:]
 	return cycle
@@ -320,6 +322,7 @@ def find_eulerian_cycle(graph):
 
 # 57-5
 # 57-6		
+# 58-14	
 def path_degrees(graph):
 	indegree = {}
 	outdegree = {}
@@ -340,6 +343,7 @@ def path_degrees(graph):
 
 # 57-5		
 # 57-6		
+# 58-14	
 def find_eulerian_endpoints(graph):
 	indegree, outdegree = path_degrees(graph)
 	startnode, endnode = None, None
@@ -364,6 +368,7 @@ def find_eulerian_endpoints(graph):
 
 # 57-5		
 # 57-6		
+# 58-14	
 def find_eulerian_path(graph):
 	startnode, endnode = find_eulerian_endpoints(graph)
 	if endnode in graph:
@@ -422,4 +427,29 @@ def k_universal_graph(k):
 		graph[node] = set(universal_extend([node[1:]]))
 	return graph
 		
-	
+# 58-14
+def parse_graph_from_pairs(pairs):
+	graph = {}
+	for pair in pairs:
+		read1, read2 = pair.split('|')
+		source = '{}|{}'.format(read1[:-1], read2[:-1])
+		sink = '{}|{}'.format(read1[1:], read2[1:])
+		
+		if source in graph:
+			graph[source].add(sink)
+		else:
+			graph[source] = set([sink])
+	return graph
+
+# 58-14	
+def assemble_path_from_pairs(path, d):
+	first_reads = [x.split('|')[0] for x in path]
+	second_reads = [x.split('|')[1] for x in path]
+	first_reads_path = assemble_path(first_reads)
+	second_reads_path = assemble_path(second_reads)
+	gap = d + len(first_reads[0]) + 1
+	if not overlap_n(first_reads_path, second_reads_path, len(first_reads_path)-gap):
+		raise Exception('paths {} and {} do not overlap'.format(first_reads_path, second_reads_path))
+		
+	return first_reads_path + second_reads_path[-gap:]
+
