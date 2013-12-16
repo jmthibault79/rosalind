@@ -323,6 +323,7 @@ def find_eulerian_cycle(graph):
 # 57-5
 # 57-6		
 # 58-14	
+# 59-5
 def path_degrees(graph):
 	indegree = {}
 	outdegree = {}
@@ -389,11 +390,13 @@ def find_eulerian_path(graph):
 
 # 57-6
 # 57-10
+# 59-5
 def overlap_n(a, b, n):
 	return a[-n:] == b[:n]
 
 # 57-6		
 # 57-10		
+# 59-5
 def assemble_path(path):
 	sequence = path[0]
 	for kmer in path[1:]:
@@ -453,3 +456,38 @@ def assemble_path_from_pairs(path, d):
 		
 	return first_reads_path + second_reads_path[-gap:]
 
+# 59-5
+def debruijn_graph_with_duplicates(sequences):
+	graph = {}
+	for sequence in sequences:
+		source, sink = sequence[:-1], sequence[1:]
+		if source in graph:
+			graph[source].append(sink)
+		else:
+			graph[source] = [sink]
+	return graph
+
+# 59-5
+def find_contigs(graph, node, indegree, outdegree):
+	contigs = []
+	for next in graph[node]:
+		new_path = [node, next]
+		ins, outs = indegree[next], outdegree[next]
+		while ins == 1 and outs == 1:
+			node = next
+			next = graph[node][0]
+			new_path.append(next)
+			ins, outs = indegree[next], outdegree[next]
+		contigs.append(new_path)
+	return contigs
+
+# 59-5
+def debruijn_to_contigs(graph):
+	outpaths = []
+	indegree, outdegree = path_degrees(graph)
+	for node in outdegree:
+		ins, outs = indegree[node], outdegree[node]
+		if outs > 0 and not (outs == 1 and ins == 1):
+			outpaths.extend(find_contigs(graph, node, indegree, outdegree))
+	return outpaths
+		
