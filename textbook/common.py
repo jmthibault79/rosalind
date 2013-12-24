@@ -593,3 +593,77 @@ def output_longest_common_subsequence(backtrack_matrix, v, i, j):
     else:
         retstr = output_longest_common_subsequence(backtrack_matrix, v, i - 1, j - 1)
         return retstr + v[i - 1]
+
+# 74-7
+def parse_dag_edges(edge_strs):
+    graph = {}
+    for edge_str in edge_strs:
+        source, rest = edge_str.split('->')
+        sink, weightstr = rest.split(':')
+        weight = int(weightstr)
+        if source in graph:
+            graph[source].append([sink, weight])
+        else:
+            graph[source] = [[sink, weight]]
+    return graph
+
+# 74-7
+def wikipedia_depth_first_topological_sort_visit(dag,node,unmarked,temp_marked,ordered):
+    if node in temp_marked:
+        raise Exception("Not a DAG!")
+    if node in unmarked:
+        temp_marked.add(node)
+        for sinkweight in dag[node]:
+            sink, weight = sinkweight
+            unmarked,temp_marked,ordered = wikipedia_depth_first_topological_sort_visit(dag,sink,unmarked,temp_marked,ordered)
+        unmarked.remove(node)
+        temp_marked.remove(node)
+        ordered = [node] + ordered
+    return unmarked,temp_marked,ordered
+
+# 74-7
+def wikipedia_depth_first_topological_sort(dag, sink):
+    from random import sample
+
+    # set of nodes only
+    unmarked = {x for x in dag}
+    temp_marked = set()
+    ordered = []
+    while unmarked:
+        node = sample(unmarked, 1)[0]
+        unmarked,temp_marked,ordered = wikipedia_depth_first_topological_sort_visit(dag,node,unmarked,temp_marked,ordered)
+
+    return ordered
+
+# 74-7
+def longest_dag_weight(dag, ordering, source, final_sink):
+    vals = {}
+    backtrack = {}
+    for node in ordering:
+        if node in vals:
+            nodeval = vals[node]
+        else:
+            if node != source:
+                continue
+            nodeval = 0
+        for sinkweight in dag[node]:
+            sink, weight = sinkweight
+            sinkval = nodeval + weight
+            if sink in vals:
+                if sinkval > vals[sink]:
+                    vals[sink] = sinkval
+                    backtrack[sink] = node
+            else:
+                vals[sink] = sinkval
+                backtrack[sink] = node
+
+    return vals[final_sink], backtrack
+
+# 74-7
+def output_longest_dag_path(backtrack, source, sink):
+    pred = backtrack[sink]
+    path = [pred, sink]
+    while pred != source:
+        pred = backtrack[pred]
+        path = [pred] + path
+    return '->'.join(path)
