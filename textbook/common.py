@@ -503,3 +503,36 @@ def make_change(change, coins):
                     min = num_coins
         change_map[money] = min
     return change_map[change]
+
+# 72-9
+def parse_matrix(instrings, n, m):
+    mat = []
+    if len(instrings) != n:
+        raise Exception('Expected n={} rows, saw {}'.format(n, len(instrings)))
+    for instring in instrings:
+        row = map(int, instring.split(' '))
+        if len(row) != m:
+            raise Exception('Expected m={} columns, saw {}'.format(m, len(instring)))
+        mat.append(row)
+    return mat
+
+# 72-9
+def longest_path(n, m, downmatrix, rightmatrix):
+    pathmatrix = []
+    for rows in range(n + 1):
+        row = []
+        for cols in range(m + 1):
+            row.append(0)
+        pathmatrix.append(row)
+
+    for row in range(1, n + 1):
+        pathmatrix[row][0] = pathmatrix[row - 1][0] + downmatrix[row - 1][0]
+    for col in range(1, m + 1):
+        pathmatrix[0][col] = pathmatrix[0][col - 1] + rightmatrix[0][col - 1]
+    for row in range(1, n + 1):
+        for col in range(1, m + 1):
+            down = pathmatrix[row - 1][col] + downmatrix[row - 1][col]
+            right = pathmatrix[row][col - 1] + rightmatrix[row][col - 1]
+            pathmatrix[row][col] = max(down, right)
+
+    return pathmatrix[n][m]
