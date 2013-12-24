@@ -517,13 +517,18 @@ def parse_matrix(instrings, n, m):
     return mat
 
 # 72-9
+def init_matrix(rows, cols):
+    matrix = []
+    for row in range(rows):
+        m_row = []
+        for col in range(cols):
+            m_row.append(0)
+        matrix.append(m_row)
+    return matrix
+
+# 72-9
 def longest_path(n, m, downmatrix, rightmatrix):
-    pathmatrix = []
-    for rows in range(n + 1):
-        row = []
-        for cols in range(m + 1):
-            row.append(0)
-        pathmatrix.append(row)
+    pathmatrix = init_matrix(n + 1, m + 1)
 
     for row in range(1, n + 1):
         pathmatrix[row][0] = pathmatrix[row - 1][0] + downmatrix[row - 1][0]
@@ -536,3 +541,55 @@ def longest_path(n, m, downmatrix, rightmatrix):
             pathmatrix[row][col] = max(down, right)
 
     return pathmatrix[n][m]
+
+# 74-5
+def max_and_direction(down, right, diag):
+    dir = 'down'
+    max = down
+    if right > max:
+        dir = 'right'
+        max = right
+    if diag > max:
+        dir = 'diag'
+        max = diag
+    return max, dir
+
+# 74-5
+def print_matrix(matrix):
+    for row in matrix:
+        print(row)
+
+# 74-5
+def longest_common_subsequence(seq1, seq2):
+    v = len(seq1)
+    w = len(seq2)
+    pathmatrix = init_matrix(v + 1, w + 1)
+    backtrack_matrix = init_matrix(v + 1, w + 1)
+
+    for row in range(1, v + 1):
+        for col in range(1, w + 1):
+            down = pathmatrix[row - 1][col]
+            right = pathmatrix[row][col - 1]
+            diag = pathmatrix[row - 1][col - 1]
+            if seq1[row - 1] == seq2[col - 1]:
+                diag += 1
+
+            max, dir = max_and_direction(down, right, diag)
+            pathmatrix[row][col] = max
+            backtrack_matrix[row][col] = dir
+
+    return pathmatrix[v][w], backtrack_matrix
+
+# 74-5
+def output_longest_common_subsequence(backtrack_matrix, v, i, j):
+    if i == 0 or j == 0:
+        return ''
+
+    dir = backtrack_matrix[i][j]
+    if dir == 'down':
+        return output_longest_common_subsequence(backtrack_matrix, v, i - 1, j)
+    elif dir == 'right':
+        return output_longest_common_subsequence(backtrack_matrix, v, i, j - 1)
+    else:
+        retstr = output_longest_common_subsequence(backtrack_matrix, v, i - 1, j - 1)
+        return retstr + v[i - 1]
