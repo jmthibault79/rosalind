@@ -667,3 +667,56 @@ def output_longest_dag_path(backtrack, source, sink):
         pred = backtrack[pred]
         path = [pred] + path
     return '->'.join(path)
+
+# 76-3
+def parse_scoring_matrix(lines):
+    # non-empty only
+    header = [x for x in lines[0].strip().split(' ') if x]
+
+    matrix = {}
+    for line in lines[1:]:
+        elements = [x for x in line.strip().split(' ') if x]
+        matrix_row = dict(zip(header, map(int, elements[1:])))
+        matrix[elements[0]] = matrix_row
+    return matrix
+
+# 76-3
+def scored_longest_common_subsequence(scoring_matrix, indel_penalty, seq1, seq2):
+    v = len(seq1)
+    w = len(seq2)
+    pathmatrix = init_matrix(v + 1, w + 1)
+    backtrack_matrix = init_matrix(v + 1, w + 1)
+
+    for row in range(1, v + 1):
+        pathmatrix[row][0] = pathmatrix[row - 1][0] + indel_penalty
+    for col in range(1, w + 1):
+        pathmatrix[0][col] = pathmatrix[0][col - 1] + indel_penalty
+    for row in range(1, v + 1):
+        for col in range(1, w + 1):
+            down = pathmatrix[row - 1][col] + indel_penalty
+            right = pathmatrix[row][col - 1] + indel_penalty
+            diag = pathmatrix[row - 1][col - 1] + scoring_matrix[seq1[row - 1]][seq2[col - 1]]
+
+            max, dir = max_and_direction(down, right, diag)
+            pathmatrix[row][col] = max
+            backtrack_matrix[row][col] = dir
+
+    return pathmatrix[v][w], backtrack_matrix
+
+# 74-5
+def output_longest_common_subsequence_aligned(backtrack_matrix, v, w, i, j):
+    if i == 0:
+        return '-'*j, w[:j]
+    if j == 0:
+        return v[:i], '-'*i
+
+    dir = backtrack_matrix[i][j]
+    if dir == 'down':
+        retstr1, retstr2 = output_longest_common_subsequence_aligned(backtrack_matrix, v, w, i - 1, j)
+        return retstr1 + v[i - 1], retstr2 + '-'
+    elif dir == 'right':
+        retstr1, retstr2 = output_longest_common_subsequence_aligned(backtrack_matrix, v, w, i, j - 1)
+        return retstr1 + '-', retstr2 + w[j - 1]
+    else:
+        retstr1, retstr2 = output_longest_common_subsequence_aligned(backtrack_matrix, v, w, i - 1, j - 1)
+        return retstr1 + v[i - 1], retstr2 + w[j - 1]
