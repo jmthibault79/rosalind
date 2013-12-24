@@ -543,6 +543,8 @@ def longest_path(n, m, downmatrix, rightmatrix):
     return pathmatrix[n][m]
 
 # 74-5
+# 76-3
+# 76-9
 def max_and_direction(down, right, diag):
     dir = 'down'
     max = down
@@ -669,6 +671,7 @@ def output_longest_dag_path(backtrack, source, sink):
     return '->'.join(path)
 
 # 76-3
+# 76-9
 def parse_scoring_matrix(lines):
     # non-empty only
     header = [x for x in lines[0].strip().split(' ') if x]
@@ -703,7 +706,7 @@ def scored_longest_common_subsequence(scoring_matrix, indel_penalty, seq1, seq2)
 
     return pathmatrix[v][w], backtrack_matrix
 
-# 74-5
+# 76-3
 def output_longest_common_subsequence_aligned(backtrack_matrix, v, w, i, j):
     if i == 0:
         return '-'*j, w[:j]
@@ -720,3 +723,45 @@ def output_longest_common_subsequence_aligned(backtrack_matrix, v, w, i, j):
     else:
         retstr1, retstr2 = output_longest_common_subsequence_aligned(backtrack_matrix, v, w, i - 1, j - 1)
         return retstr1 + v[i - 1], retstr2 + w[j - 1]
+
+# 76-9
+def scored_longest_common_subsequence_local(scoring_matrix, indel_penalty, seq1, seq2):
+    v = len(seq1)
+    w = len(seq2)
+    pathmatrix = init_matrix(v + 1, w + 1)
+    backtrack_matrix = init_matrix(v + 1, w + 1)
+    best_result, best_row, best_col = -1, -1, -1
+    for row in range(1, v + 1):
+        for col in range(1, w + 1):
+            down = pathmatrix[row - 1][col] + indel_penalty
+            right = pathmatrix[row][col - 1] + indel_penalty
+            diag = pathmatrix[row - 1][col - 1] + scoring_matrix[seq1[row - 1]][seq2[col - 1]]
+
+            max, dir = max_and_direction(down, right, diag)
+            if max < 0:
+                max, dir = 0, 'zero'
+            elif max > best_result:
+                best_result = max
+                best_row = row
+                best_col = col
+            pathmatrix[row][col] = max
+            backtrack_matrix[row][col] = dir
+    return pathmatrix[best_row][best_col], backtrack_matrix, best_row, best_col
+
+# 76-9
+def output_longest_common_subsequence_local(backtrack_matrix, v, w, i, j):
+    if i == 0 or j == 0:
+        return '', ''
+
+    dir = backtrack_matrix[i][j]
+    if dir == 'down':
+        retstr1, retstr2 = output_longest_common_subsequence_local(backtrack_matrix, v, w, i - 1, j)
+        return retstr1 + v[i - 1], retstr2 + '-'
+    elif dir == 'right':
+        retstr1, retstr2 = output_longest_common_subsequence_local(backtrack_matrix, v, w, i, j - 1)
+        return retstr1 + '-', retstr2 + w[j - 1]
+    elif dir == 'diag':
+        retstr1, retstr2 = output_longest_common_subsequence_local(backtrack_matrix, v, w, i - 1, j - 1)
+        return retstr1 + v[i - 1], retstr2 + w[j - 1]
+    else:
+        return '', ''

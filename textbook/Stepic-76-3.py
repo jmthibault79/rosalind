@@ -20,11 +20,6 @@ str2 = inout.infilelines[1].strip()
 scoring_matrix = common.parse_scoring_matrix(inout.readlines('BLOSUM62.txt'))
 indel_penalty = -5
 
-# output_longest_common_subsequence was hitting the default limit of 1000 for the test dataset
-# https://class.coursera.org/bioinformatics-001/forum/thread?thread_id=742
-#import sys
-#sys.setrecursionlimit(2000)
-
 longest, backtrack_matrix = common.scored_longest_common_subsequence(scoring_matrix, indel_penalty, str1, str2)
 aligned1, aligned2 = common.output_longest_common_subsequence_aligned(backtrack_matrix, str1, str2, len(str1), len(str2))
 
