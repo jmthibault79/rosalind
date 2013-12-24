@@ -490,4 +490,16 @@ def debruijn_to_contigs(graph):
 		if outs > 0 and not (outs == 1 and ins == 1):
 			outpaths.extend(find_contigs(graph, node, indegree, outdegree))
 	return outpaths
-		
+
+# 71-8
+def make_change(change, coins):
+    change_map = { 0: 0, 1: 1 }
+    for money in range(2, change + 1):
+        min = 10000000
+        for coin in coins:
+            if money - coin in change_map:
+                num_coins = change_map[money - coin] + 1
+                if num_coins < min:
+                    min = num_coins
+        change_map[money] = min
+    return change_map[change]
