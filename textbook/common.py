@@ -520,6 +520,7 @@ def parse_matrix(instrings, n, m):
 # 248-3
 # 248-5
 # 248-7
+# 249-8
 def init_matrix(rows, cols):
     matrix = []
     for row in range(rows):
@@ -864,3 +865,113 @@ def scored_longest_common_subsequence_overlap(scoring_matrix, indel_penalty, seq
             best_col = col
 
     return pathmatrix[best_row][best_col], backtrack_matrix, best_row, best_col
+
+# 249-8
+def lower_max_and_direction(lower_down, lower_from_middle):
+    dir = 'down'
+    max = lower_down
+    if lower_from_middle > max:
+        dir = 'lower_from_middle'
+        max = lower_from_middle
+    return max, dir
+
+# 249-8
+def upper_max_and_direction(upper_right, upper_from_middle):
+    dir = 'right'
+    max = upper_right
+    if upper_from_middle > max:
+        dir = 'upper_from_middle'
+        max = upper_from_middle
+    return max, dir
+
+# 249-8
+def middle_max_and_direction(diag, lower_best, upper_best):
+    dir = 'diag'
+    max = diag
+    if lower_best > max:
+        dir = 'middle_from_lower'
+        max = lower_best
+    if upper_best > max:
+        dir = 'middle_from_upper'
+        max = upper_best
+    return max, dir
+
+# 249-8
+def scored_longest_common_subsequence_affine(scoring_matrix, gap_open, gap_extend, seq1, seq2):
+    v = len(seq1)
+    w = len(seq2)
+    lower = init_matrix(v + 1, w + 1)
+    middle = init_matrix(v + 1, w + 1)
+    upper = init_matrix(v + 1, w + 1)
+    backtrack_matrix_lower = init_matrix(v + 1, w + 1)
+    backtrack_matrix_middle = init_matrix(v + 1, w + 1)
+    backtrack_matrix_upper = init_matrix(v + 1, w + 1)
+
+    for col in range(1, w + 1):
+        for row in range(1, v + 1):
+            lower_down = lower[row - 1][col] + gap_extend
+            lower_from_middle = middle[row - 1][col] + gap_open
+            lower_best, lower_dir = lower_max_and_direction(lower_down, lower_from_middle)
+            lower[row][col] = lower_best
+            backtrack_matrix_lower[row][col] = lower_dir
+
+            upper_right = upper[row][col - 1] + gap_extend
+            upper_from_middle = middle[row][col - 1] + gap_open
+            upper_best, upper_dir = upper_max_and_direction(upper_right, upper_from_middle)
+            upper[row][col] = upper_best
+            backtrack_matrix_upper[row][col] = upper_dir
+
+            diag = middle[row - 1][col - 1] + scoring_matrix[seq1[row - 1]][seq2[col - 1]]
+
+            middle_best, middle_dir = middle_max_and_direction(diag, lower_best, upper_best)
+
+            middle[row][col] = middle_best
+            backtrack_matrix_middle[row][col] = middle_dir
+
+    return middle[v][w], backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w
+
+# 249-8
+def output_longest_common_subsequence_affine_lower(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i, j):
+    if i == 0:
+        return '-'*j, w[:j]
+    if j == 0:
+        return v[:i], '-'*i
+
+    dir = backtrack_matrix_lower[i][j]
+    if dir == 'lower_from_middle':
+        retstr1, retstr2 = output_longest_common_subsequence_affine_middle(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i - 1, j)
+    else:
+        retstr1, retstr2 = output_longest_common_subsequence_affine_lower(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i - 1, j)
+
+    return retstr1 + v[i - 1], retstr2 + "-"
+
+# 249-8
+def output_longest_common_subsequence_affine_upper(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i, j):
+    if i == 0:
+        return '-'*j, w[:j]
+    if j == 0:
+        return v[:i], '-'*i
+
+    dir = backtrack_matrix_upper[i][j]
+    if dir == 'upper_from_middle':
+        retstr1, retstr2 = output_longest_common_subsequence_affine_middle(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i, j - 1)
+    else:
+        retstr1, retstr2 = output_longest_common_subsequence_affine_upper(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i, j - 1)
+
+    return retstr1 + "-", retstr2 + w[j - 1]
+
+# 249-8
+def output_longest_common_subsequence_affine_middle(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i, j):
+    if i == 0:
+        return '-'*j, w[:j]
+    if j == 0:
+        return v[:i], '-'*i
+
+    dir = backtrack_matrix_middle[i][j]
+    if dir == 'middle_from_lower':
+        return output_longest_common_subsequence_affine_lower(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i, j)
+    elif dir == 'middle_from_upper':
+        return output_longest_common_subsequence_affine_upper(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i, j)
+    else:
+        retstr1, retstr2 = output_longest_common_subsequence_affine_middle(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i - 1, j - 1)
+        return retstr1 + v[i - 1], retstr2 + w[j - 1]
