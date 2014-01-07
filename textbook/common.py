@@ -518,6 +518,7 @@ def parse_matrix(instrings, n, m):
 
 # 72-9
 # 248-3
+# 248-5
 def init_matrix(rows, cols):
     matrix = []
     for row in range(rows):
@@ -547,6 +548,7 @@ def longest_path(n, m, downmatrix, rightmatrix):
 # 76-3
 # 76-9
 # 248-3
+# 248-5
 def max_and_direction(down, right, diag):
     dir = 'down'
     max = down
@@ -752,6 +754,7 @@ def scored_longest_common_subsequence_local(scoring_matrix, indel_penalty, seq1,
     return pathmatrix[best_row][best_col], backtrack_matrix, best_row, best_col
 
 # 76-9
+# 248-5
 def output_longest_common_subsequence_local(backtrack_matrix, v, w, i, j):
     if i == 0 or j == 0:
         return '', ''
@@ -781,3 +784,40 @@ def mismatch_scoring_matrix(alphabet):
                 matrix_row[other_letter] = -1
         matrix[letter] = matrix_row
     return matrix
+
+# 248-5
+def mismatch_scoring_matrix_fitted(alphabet):
+    matrix = {}
+    for letter in alphabet:
+        matrix_row = {}
+        for other_letter in alphabet:
+            if letter == other_letter:
+                matrix_row[other_letter] = 1
+            else:
+                matrix_row[other_letter] = -1
+        matrix[letter] = matrix_row
+    return matrix
+
+# 248-5
+def scored_longest_common_subsequence_fitted(scoring_matrix, indel_penalty, seq1, seq2):
+    v = len(seq1)
+    w = len(seq2)
+    pathmatrix = init_matrix(v + 1, w + 1)
+    backtrack_matrix = init_matrix(v + 1, w + 1)
+    best_row, best_col = -1000000, -1000000
+    for col in range(1, w + 1):
+        best_result_for_col = -1000000
+        pathmatrix[0][col] = pathmatrix[0][col - 1] + indel_penalty
+        for row in range(1, v + 1):
+            down = pathmatrix[row - 1][col] + indel_penalty
+            right = pathmatrix[row][col - 1] + indel_penalty
+            diag = pathmatrix[row - 1][col - 1] + scoring_matrix[seq1[row - 1]][seq2[col - 1]]
+
+            max, dir = max_and_direction(down, right, diag)
+            if max > best_result_for_col:
+                best_result_for_col = max
+                best_row = row
+                best_col = col
+            pathmatrix[row][col] = max
+            backtrack_matrix[row][col] = dir
+    return pathmatrix[best_row][best_col], backtrack_matrix, best_row, best_col
