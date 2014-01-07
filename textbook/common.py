@@ -517,6 +517,7 @@ def parse_matrix(instrings, n, m):
     return mat
 
 # 72-9
+# 248-3
 def init_matrix(rows, cols):
     matrix = []
     for row in range(rows):
@@ -545,6 +546,7 @@ def longest_path(n, m, downmatrix, rightmatrix):
 # 74-5
 # 76-3
 # 76-9
+# 248-3
 def max_and_direction(down, right, diag):
     dir = 'down'
     max = down
@@ -684,6 +686,7 @@ def parse_scoring_matrix(lines):
     return matrix
 
 # 76-3
+# 248-3
 def scored_longest_common_subsequence(scoring_matrix, indel_penalty, seq1, seq2):
     v = len(seq1)
     w = len(seq2)
@@ -765,3 +768,16 @@ def output_longest_common_subsequence_local(backtrack_matrix, v, w, i, j):
         return retstr1 + v[i - 1], retstr2 + w[j - 1]
     else:
         return '', ''
+
+# 248-3
+def mismatch_scoring_matrix(alphabet):
+    matrix = {}
+    for letter in alphabet:
+        matrix_row = {}
+        for other_letter in alphabet:
+            if letter == other_letter:
+                matrix_row[other_letter] = 0
+            else:
+                matrix_row[other_letter] = -1
+        matrix[letter] = matrix_row
+    return matrix
