@@ -519,6 +519,7 @@ def parse_matrix(instrings, n, m):
 # 72-9
 # 248-3
 # 248-5
+# 248-7
 def init_matrix(rows, cols):
     matrix = []
     for row in range(rows):
@@ -549,6 +550,7 @@ def longest_path(n, m, downmatrix, rightmatrix):
 # 76-9
 # 248-3
 # 248-5
+# 248-7
 def max_and_direction(down, right, diag):
     dir = 'down'
     max = down
@@ -744,7 +746,7 @@ def scored_longest_common_subsequence_local(scoring_matrix, indel_penalty, seq1,
 
             max, dir = max_and_direction(down, right, diag)
             if max < 0:
-                max, dir = 0, 'zero'
+                max, dir = 0, 'zero'    # "free ride"
             elif max > best_result:
                 best_result = max
                 best_row = row
@@ -755,6 +757,7 @@ def scored_longest_common_subsequence_local(scoring_matrix, indel_penalty, seq1,
 
 # 76-9
 # 248-5
+# 248-7
 def output_longest_common_subsequence_local(backtrack_matrix, v, w, i, j):
     if i == 0 or j == 0:
         return '', ''
@@ -820,4 +823,44 @@ def scored_longest_common_subsequence_fitted(scoring_matrix, indel_penalty, seq1
                 best_col = col
             pathmatrix[row][col] = max
             backtrack_matrix[row][col] = dir
+    return pathmatrix[best_row][best_col], backtrack_matrix, best_row, best_col
+
+# 248-7
+def mismatch_scoring_matrix_overlap(alphabet):
+    matrix = {}
+    for letter in alphabet:
+        matrix_row = {}
+        for other_letter in alphabet:
+            if letter == other_letter:
+                matrix_row[other_letter] = 1
+            else:
+                matrix_row[other_letter] = -2
+        matrix[letter] = matrix_row
+    return matrix
+
+# 248-7
+def scored_longest_common_subsequence_overlap(scoring_matrix, indel_penalty, seq1, seq2):
+    v = len(seq1)
+    w = len(seq2)
+    pathmatrix = init_matrix(v + 1, w + 1)
+    backtrack_matrix = init_matrix(v + 1, w + 1)
+    best_result, best_row, best_col = None, None, None
+    for col in range(1, w + 1):
+        for row in range(1, v + 1):
+            down = pathmatrix[row - 1][col] + indel_penalty
+            right = pathmatrix[row][col - 1] + indel_penalty
+            diag = pathmatrix[row - 1][col - 1] + scoring_matrix[seq1[row - 1]][seq2[col - 1]]
+
+            best, dir = max_and_direction(down, right, diag)
+            pathmatrix[row][col] = best
+            backtrack_matrix[row][col] = dir
+
+    best_result = None
+    best_row = v
+    for col in range(1, w + 1):
+        val = pathmatrix[best_row][col]
+        if val > best_result:
+            best_result = val
+            best_col = col
+
     return pathmatrix[best_row][best_col], backtrack_matrix, best_row, best_col
