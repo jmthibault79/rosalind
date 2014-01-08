@@ -521,6 +521,7 @@ def parse_matrix(instrings, n, m):
 # 248-5
 # 248-7
 # 249-8
+# 250-12
 def init_matrix(rows, cols):
     matrix = []
     for row in range(rows):
@@ -975,3 +976,47 @@ def output_longest_common_subsequence_affine_middle(backtrack_matrix_lower, back
     else:
         retstr1, retstr2 = output_longest_common_subsequence_affine_middle(backtrack_matrix_lower, backtrack_matrix_middle, backtrack_matrix_upper, v, w, i - 1, j - 1)
         return retstr1 + v[i - 1], retstr2 + w[j - 1]
+
+# 250-12
+def middle_edge_half_matrix(scoring_matrix, indel_penalty, halfseq1, halfseq2):
+    v = len(halfseq1)
+    w = len(halfseq2)
+    m = init_matrix(v + 1, w + 1)
+    for row in range(1, v + 1):
+        m[row][0] = m[row - 1][0] + indel_penalty
+    for col in range(1, w + 1):
+        m[0][col] = m[0][col - 1] + indel_penalty
+        for row in range(1, v + 1):
+            down = m[row - 1][col] + indel_penalty
+            right = m[row][col - 1] + indel_penalty
+            diag = m[row - 1][col - 1] + scoring_matrix[halfseq1[row - 1]][halfseq2[col - 1]]
+
+            best = max(down, right, diag)
+            m[row][col] = best
+    return m
+
+# 250-12
+def revstr(fwd_str):
+    return fwd_str[::-1]
+
+# 250-12
+def alignment_middle_edge(scoring_matrix, indel_penalty, seq1, seq2):
+    v = len(seq1)
+    w = len(seq2)
+    middle_col = w/2
+    forward_half = middle_edge_half_matrix(scoring_matrix, indel_penalty, seq1, seq2[:middle_col])
+    backward_half = middle_edge_half_matrix(scoring_matrix, indel_penalty, revstr(seq1), revstr(seq2[middle_col:]))
+
+    best_row, best_total = None, None
+    for row in range(0, v + 1):
+        total = forward_half[row][middle_col] + backward_half[v - row][middle_col + 1]
+        if total > best_total:
+            best_total = total
+            best_row = row
+
+    # which direction to go?  if score > indel_penalty, diagonal, else right (so we are no longer in middle col)
+    to_row, to_col = best_row + 1, middle_col + 1
+    match_score_at_middle_node = scoring_matrix[seq1[best_row]][seq2[middle_col]]
+    if match_score_at_middle_node < indel_penalty:
+        to_row = best_row
+    return best_row, middle_col, to_row, to_col
