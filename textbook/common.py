@@ -522,6 +522,7 @@ def parse_matrix(instrings, n, m):
 # 248-7
 # 249-8
 # 250-12
+# 250-14
 def init_matrix(rows, cols):
     matrix = []
     for row in range(rows):
@@ -978,10 +979,12 @@ def output_longest_common_subsequence_affine_middle(backtrack_matrix_lower, back
         return retstr1 + v[i - 1], retstr2 + w[j - 1]
 
 # 250-12
+# 250-14
 def middle_edge_half_matrix(scoring_matrix, indel_penalty, halfseq1, halfseq2):
     v = len(halfseq1)
     w = len(halfseq2)
     m = init_matrix(v + 1, w + 1)
+    backtrack_col = { 0: 'right' }
     for row in range(1, v + 1):
         m[row][0] = m[row - 1][0] + indel_penalty
     for col in range(1, w + 1):
@@ -991,32 +994,105 @@ def middle_edge_half_matrix(scoring_matrix, indel_penalty, halfseq1, halfseq2):
             right = m[row][col - 1] + indel_penalty
             diag = m[row - 1][col - 1] + scoring_matrix[halfseq1[row - 1]][halfseq2[col - 1]]
 
-            best = max(down, right, diag)
+            best, direction = max_and_direction(down, right, diag)
             m[row][col] = best
-    return m
+
+            if col == w:
+                backtrack_col[row] = direction
+    return m, backtrack_col
 
 # 250-12
+# 250-14
 def revstr(fwd_str):
     return fwd_str[::-1]
 
 # 250-12
+# 250-14
 def alignment_middle_edge(scoring_matrix, indel_penalty, seq1, seq2):
     v = len(seq1)
     w = len(seq2)
     middle_col = w/2
-    forward_half = middle_edge_half_matrix(scoring_matrix, indel_penalty, seq1, seq2[:middle_col])
-    backward_half = middle_edge_half_matrix(scoring_matrix, indel_penalty, revstr(seq1), revstr(seq2[middle_col:]))
+
+    forward_half, forward_backtrack = middle_edge_half_matrix(scoring_matrix, indel_penalty, seq1, seq2[:middle_col])
+    backward_half, backward_backtrack = middle_edge_half_matrix(scoring_matrix, indel_penalty, revstr(seq1), revstr(seq2[middle_col:]))
+
+    backward_col_offset = middle_col + 1
+    if middle_col * 2 == w:
+         backward_col_offset = middle_col
 
     best_row, best_total = None, None
     for row in range(0, v + 1):
-        total = forward_half[row][middle_col] + backward_half[v - row][middle_col + 1]
+        total = forward_half[row][middle_col] + backward_half[v - row][backward_col_offset]
         if total > best_total:
             best_total = total
             best_row = row
 
-    # which direction to go?  if score > indel_penalty, diagonal, else right (so we are no longer in middle col)
-    to_row, to_col = best_row + 1, middle_col + 1
-    match_score_at_middle_node = scoring_matrix[seq1[best_row]][seq2[middle_col]]
-    if match_score_at_middle_node < indel_penalty:
-        to_row = best_row
+    # which direction to go?  which was best in backward_half
+    direction = backward_backtrack[v - best_row]
+    if direction == 'diag':
+        to_row, to_col = best_row + 1, middle_col + 1
+    elif direction == 'down':
+        to_row, to_col = best_row + 1, middle_col
+    elif direction == 'right':
+        to_row, to_col = best_row, middle_col + 1
+
     return best_row, middle_col, to_row, to_col
+
+# 250-14
+def linear_space_alignment_part(scoring_matrix, indel_penalty, seq1, seq2, row_start, col_start, row_end, col_end):
+    if row_start == row_end:
+        right_path = {}
+        for col in range(col_start, col_end):
+            right_path[(row_start, col)] = (row_start, col + 1)
+        return right_path
+    elif col_start == col_end:
+        down_path = {}
+        for row in range(row_start, row_end):
+            down_path[(row, col_start)] = (row + 1, col_start)
+        return down_path
+
+    subseq1 = seq1[row_start:row_end]
+    subseq2 = seq2[col_start:col_end]
+
+    from_row, from_col, to_row, to_col = alignment_middle_edge(scoring_matrix, indel_penalty, subseq1, subseq2)
+
+    edge_start_row, edge_start_col = row_start + from_row, col_start + from_col
+    edge_end_row, edge_end_col = row_start + to_row, col_start + to_col
+    path = { (edge_start_row, edge_start_col): (edge_end_row, edge_end_col) }
+
+    first_half_path = linear_space_alignment_part(scoring_matrix, indel_penalty, seq1, seq2, row_start, col_start, edge_start_row, edge_start_col)
+    second_half_path = linear_space_alignment_part(scoring_matrix, indel_penalty, seq1, seq2, edge_end_row, edge_end_col, row_end, col_end)
+
+    path.update(first_half_path)
+    path.update(second_half_path)
+
+    return path
+
+# 250-14
+def score_and_align_linear_space(scoring_matrix, indel_penalty, seq1, seq2, v, w, path):
+    score, align1, align2 = 0, '', ''
+    row, col = 0, 0
+    while row != v or col != w:
+        to_row, to_col = path[(row, col)]
+        if to_row == row + 1 and to_col == col + 1:
+            let1, let2 = seq1[row], seq2[col]
+            score = score + scoring_matrix[let1][let2]
+            align1, align2 = align1 + let1, align2 + let2
+        elif to_row == row + 1 and to_col == col:
+            score = score + indel_penalty
+            let1 = seq1[row]
+            align1, align2 = align1 + let1, align2 + '-'
+        elif to_row == row and to_col == col + 1:
+            score = score + indel_penalty
+            let2 = seq2[col]
+            align1, align2 = align1 + '-', align2 + let2
+        row, col = to_row, to_col
+
+    return score, align1, align2
+
+# 250-14
+def linear_space_alignment(scoring_matrix, indel_penalty, seq1, seq2):
+    v = len(seq1)
+    w = len(seq2)
+    path = linear_space_alignment_part(scoring_matrix, indel_penalty, seq1, seq2, 0, 0, v, w)
+    return score_and_align_linear_space(scoring_matrix, indel_penalty, seq1, seq2, v, w, path)
