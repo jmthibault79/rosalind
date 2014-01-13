@@ -1096,3 +1096,115 @@ def linear_space_alignment(scoring_matrix, indel_penalty, seq1, seq2):
     w = len(seq2)
     path = linear_space_alignment_part(scoring_matrix, indel_penalty, seq1, seq2, 0, 0, v, w)
     return score_and_align_linear_space(scoring_matrix, indel_penalty, seq1, seq2, v, w, path)
+
+# 251-5
+def init_matrix_3(x_dim, y_dim, z_dim):
+    matrix = []
+    for x in range(x_dim):
+        m_x = []
+        for y in range(y_dim):
+            m_y = []
+            for z in range(z_dim):
+                m_y.append(0)
+            m_x.append(m_y)
+        matrix.append(m_x)
+    return matrix
+
+# 251-5
+def align_3_maxdir(x_only, y_only, z_only, xy_only, yz_only, zx_only, xyz):
+    dir = 'x'
+    max = x_only
+    if y_only > max:
+        dir = 'y'
+        max = y_only
+    if z_only > max:
+        dir = 'z'
+        max = z_only
+    if xy_only > max:
+        dir = 'xy'
+        max = xy_only
+    if yz_only > max:
+        dir = 'yz'
+        max = yz_only
+    if zx_only > max:
+        dir = 'zx'
+        max = zx_only
+    if xyz > max:
+        dir = 'xyz'
+        max = xyz
+
+    return max, dir
+
+# 251-5
+def align_3(seq1, seq2 ,seq3):
+    x_len = len(seq1)
+    y_len = len(seq2)
+    z_len = len(seq3)
+    pathmatrix = init_matrix_3(x_len + 1, y_len + 1, z_len + 1)
+    backtrack_matrix = init_matrix_3(x_len + 1, y_len + 1, z_len + 1)
+    best_result = None
+
+    for x in range(1, x_len + 1):
+        for y in range(1, y_len + 1):
+            for z in range(1, z_len + 1):
+                x_only = pathmatrix[x-1][y][z]
+                y_only = pathmatrix[x][y-1][z]
+                z_only = pathmatrix[x][y][z-1]
+                xy_only = pathmatrix[x-1][y-1][z]
+                yz_only = pathmatrix[x][y-1][z-1]
+                zx_only = pathmatrix[x-1][y][z-1]
+                xyz = pathmatrix[x-1][y-1][z-1]
+
+                # score 1 for a perfect match, 0 for all others
+                if seq1[x-1] == seq2[y-1] and seq1[x-1] == seq3[z-1]:
+                    xyz = xyz + 1
+
+                best, dir = align_3_maxdir(x_only, y_only, z_only, xy_only, yz_only, zx_only, xyz)
+                if best > best_result:
+                    best_result = best
+
+                pathmatrix[x][y][z] = best
+                backtrack_matrix[x][y][z] = dir
+    return best, backtrack_matrix, x_len, y_len, z_len
+
+# 251-5
+def output_align_3(backtrack_matrix, seq1, seq2, seq3, x, y, z):
+    if x == 0 and y == 0 and z == 0:
+        return '', '', ''
+    if x == 0 and y == 0:
+        return '-'*z, '-'*z, seq3[:z]
+    if y == 0 and z == 0:
+        return seq1[:x], '-'*x, '-'*x
+    if z == 0 and x == 0:
+        return '-'*y, seq2[:y], '-'*y
+
+    if x == 0:
+        dir = 'yz'
+    elif y == 0:
+        dir = 'zx'
+    elif z == 0:
+        dir = 'xy'
+    else:
+        dir = backtrack_matrix[x][y][z]
+
+    if dir == 'x':
+        retstr1, retstr2, retstr3 = output_align_3(backtrack_matrix, seq1, seq2, seq3, x-1, y, z)
+        return retstr1 + seq1[x - 1], retstr2 + '-', retstr3 + '-'
+    elif dir == 'y':
+        retstr1, retstr2, retstr3 = output_align_3(backtrack_matrix, seq1, seq2, seq3, x, y-1, z)
+        return retstr1 + '-', retstr2 + seq2[y - 1], retstr3 + '-'
+    elif dir == 'z':
+        retstr1, retstr2, retstr3 = output_align_3(backtrack_matrix, seq1, seq2, seq3, x, y, z-1)
+        return retstr1 + '-', retstr2 + '-', retstr3 + seq3[z - 1]
+    elif dir == 'xy':
+        retstr1, retstr2, retstr3 = output_align_3(backtrack_matrix, seq1, seq2, seq3, x-1, y-1, z)
+        return retstr1 + seq1[x - 1], retstr2 + seq2[y - 1], retstr3 + '-'
+    elif dir == 'yz':
+        retstr1, retstr2, retstr3 = output_align_3(backtrack_matrix, seq1, seq2, seq3, x, y-1, z-1)
+        return retstr1 + '-', retstr2 + seq2[y - 1], retstr3 + seq3[z - 1]
+    elif dir == 'zx':
+        retstr1, retstr2, retstr3 = output_align_3(backtrack_matrix, seq1, seq2, seq3, x-1, y, z-1)
+        return retstr1 + seq1[x - 1], retstr2 + '-', retstr3 + seq3[z - 1]
+    elif dir == 'xyz':
+        retstr1, retstr2, retstr3 = output_align_3(backtrack_matrix, seq1, seq2, seq3, x-1, y-1, z-1)
+        return retstr1 + seq1[x - 1], retstr2 + seq2[y - 1], retstr3 + seq3[z - 1]
