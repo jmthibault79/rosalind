@@ -1210,6 +1210,7 @@ def output_align_3(backtrack_matrix, seq1, seq2, seq3, x, y, z):
         return retstr1 + seq1[x - 1], retstr2 + seq2[y - 1], retstr3 + seq3[z - 1]
 
 # 286-2
+# 287-1
 def greedysorting_parse(perm_str):
     return map(int, perm_str.replace('(','').replace(')','').split())
 
@@ -1263,3 +1264,17 @@ def greedysorting(permutation):
                 retlist.append(list(currperm))  # copy to new list so it won't be overwritten
                 break
     return retlist
+
+# 287-1
+def count_breakpoints(permutation):
+    bp = 0
+    prev = 0
+    for cur in permutation:
+        if cur != prev + 1:
+            bp += 1
+        prev = cur
+
+    if permutation[-1] != len(permutation):
+        bp += 1
+
+    return bp
