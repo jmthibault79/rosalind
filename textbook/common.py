@@ -1208,3 +1208,58 @@ def output_align_3(backtrack_matrix, seq1, seq2, seq3, x, y, z):
     elif dir == 'xyz':
         retstr1, retstr2, retstr3 = output_align_3(backtrack_matrix, seq1, seq2, seq3, x-1, y-1, z-1)
         return retstr1 + seq1[x - 1], retstr2 + seq2[y - 1], retstr3 + seq3[z - 1]
+
+# 286-2
+def greedysorting_parse(perm_str):
+    return map(int, perm_str.replace('(','').replace(')','').split())
+
+# 286-2
+def greedysorting_out(sequence):
+    retlist = []
+    for line in sequence:
+        linestr = ''
+        for val in line:
+            if val < 0:
+                linestr += str(val) + ' '
+            else:
+                linestr += '+' + str(val) + ' '
+        retlist.append('({})'.format(linestr.strip()))
+    return '\n'.join(retlist)
+
+# 286-2
+def greedysorted(permutation):
+    for index, element in enumerate(permutation):
+        if element != index + 1:
+            return False
+    return True
+
+# 286-2
+def greedysorting_find(permutation, goal):
+    for index, element in enumerate(permutation):
+        if abs(element) == abs(goal):
+            return index
+    return None
+
+# 286-2
+def greedysorting_reverse(permutation, from_index, to_idx):
+    pre_middle = permutation[from_index:to_idx + 1]
+    to_middle = []
+    for element in pre_middle:
+        to_middle.insert(0, -element)
+    return permutation[:from_index] + to_middle + permutation[to_idx + 1:]
+
+# 286-2
+def greedysorting(permutation):
+    retlist = []
+    currperm = list(permutation)
+    while (not greedysorted(currperm)):
+        for index, element in enumerate(currperm):
+            if element != index + 1:
+                if element == -(index + 1):
+                    currperm[index] = -element
+                else:
+                    dest_idx = greedysorting_find(currperm, index + 1)
+                    currperm = greedysorting_reverse(currperm, index, dest_idx)
+                retlist.append(list(currperm))  # copy to new list so it won't be overwritten
+                break
+    return retlist
