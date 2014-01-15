@@ -1278,3 +1278,56 @@ def count_breakpoints(permutation):
         bp += 1
 
     return bp
+
+# 288-1
+def breakpoints_parse(sequence):
+    edges = {}
+    for chrom in sequence.split(')('):
+        blocks = map(int, chrom.replace('(','').replace(')','').split())
+
+        prev = blocks[-1]
+        for bp in blocks:
+            if prev > 0:
+                node1 = '{}+'.format(prev)
+            else:
+                node1 = '{}-'.format(-prev)
+
+            # reverse sign because this is the incoming edge
+            if bp > 0:
+                node2 = '{}-'.format(bp)
+            else:
+                node2 = '{}+'.format(-bp)
+
+            prev = bp
+
+            if node1 in edges:
+                edges[node1].append(node2)
+            else:
+                edges[node1] = [node2]
+
+            if node2 in edges:
+                edges[node2].append(node1)
+            else:
+                edges[node2] = [node1]
+
+    return edges
+
+# 288-1
+def breakpoints_cycles(edges):
+    count = 0
+
+    while edges:
+        startnode, sinks = edges.popitem()
+        count += 1
+        node = sinks.pop()  # choose either, at random
+        edges[node].remove(startnode)
+
+        while True:
+            sinks = edges.pop(node)
+            sink = sinks.pop()
+            if sink == startnode:
+                break
+            edges[sink].remove(node)
+            node = sink
+
+    return count
