@@ -24,6 +24,7 @@ def profile_probability(kmer, profile):
 # 41-4
 # 51-3
 # 53-6
+# 289-2
 # Enumerate all kmers in a sequence
 def all_kmers(sequence, k):
     for i in range(len(sequence) - k + 1):
@@ -1331,3 +1332,33 @@ def breakpoints_cycles(edges):
             node = sink
 
     return count
+
+# 289-2
+BASE_COMPLEMENTS = { 'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
+
+# 289-2
+def reverse_complement(kmer):
+    r = ''
+    for base in kmer:
+        r = BASE_COMPLEMENTS[base] + r
+    return r
+
+# 289-2
+def shared_kmers(k, str1, str2):
+    locations = {}
+    for index, fwd in enumerate(all_kmers(str1, k)):
+        rev = reverse_complement(fwd)
+        for kmer in (fwd, rev):
+            if kmer in locations:
+                locations[kmer].append(index)
+            else:
+                locations[kmer] = [index]
+
+    retval = []
+    for loc_2, kmer in enumerate(all_kmers(str2, k)):
+        if kmer in locations:
+            for loc_1 in locations[kmer]:
+                retval.append([loc_1, loc_2])
+
+    return retval
+
