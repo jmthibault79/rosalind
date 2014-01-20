@@ -1413,3 +1413,39 @@ def match_trie(trie, text):
                 break
     return matches
 
+# 295-8
+def create_suffix_trie(text, maxdepth):
+    trie = {}
+    maxnode = 1
+
+    for idx, suffix in enumerate(suffixes(text)):
+        node = 1
+        for char in suffix[:maxdepth] + '$':
+            if node not in trie:
+                trie[node] = {}
+            if char == '$':
+                # careful: this is not a node value, but the suffix location
+                trie[node]['$'] = idx
+            elif char in trie[node]:
+                node = trie[node][char]
+            else:
+                maxnode += 1
+                trie[node][char] = maxnode
+                node = maxnode
+
+    return trie
+
+# 295-8
+def find_longest_substring_in_suffix_trie(trie, node, string_so_far):
+    children = trie[node]
+    if len(children) > 1:
+        longest = string_so_far
+    else:
+        longest = ''
+
+    for child in children:
+        if child != '$':
+            childstr = find_longest_substring_in_suffix_trie(trie, children[child], string_so_far + child)
+            if len(childstr) > len(longest):
+                longest = childstr
+    return longest
