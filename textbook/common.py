@@ -1362,3 +1362,30 @@ def shared_kmers(k, str1, str2):
 
     return retval
 
+# 294-3
+def create_trie(strings):
+    trie = {}
+    maxnode = 1
+    for s in strings:
+        node = 1
+        for char in s:
+            if node not in trie:
+                trie[node] = {}
+            if char in trie[node]:
+                node = trie[node][char]
+            else:
+                maxnode += 1
+                trie[node][char] = maxnode
+                node = maxnode
+
+    return trie
+
+# 294-3
+def output_trie(trie):
+    outstrs = []
+    for sourcenode in trie:
+        sinkmap = trie[sourcenode]
+        for char in sinkmap:
+            sinknode = sinkmap[char]
+            outstrs.append(' '.join((str(sourcenode), str(sinknode), char)))
+    return '\n'.join(outstrs)
