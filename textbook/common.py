@@ -1363,6 +1363,7 @@ def shared_kmers(k, str1, str2):
     return retval
 
 # 294-3
+# 294-6
 def create_trie(strings):
     trie = {}
     maxnode = 1
@@ -1389,3 +1390,26 @@ def output_trie(trie):
             sinknode = sinkmap[char]
             outstrs.append(' '.join((str(sourcenode), str(sinknode), char)))
     return '\n'.join(outstrs)
+
+# 294-3
+def suffixes(string):
+    for idx in range(len(string)):
+        yield string[idx:]
+
+# 294-3
+def match_trie(trie, text):
+    matches = []
+    for idx, string in enumerate(suffixes(text)):
+        node = 1
+        for char in string:
+            if char in trie[node]:
+                node = trie[node][char]
+                if node not in trie:
+                    # no children: leaf node
+                    matches.append(idx)
+                    break
+            else:
+                # not a leaf node but we don't match its child
+                break
+    return matches
+
