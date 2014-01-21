@@ -1392,6 +1392,8 @@ def output_trie(trie):
     return '\n'.join(outstrs)
 
 # 294-3
+# 295-8
+# 310-3
 def suffixes(string):
     for idx in range(len(string)):
         yield string[idx:]
@@ -1449,3 +1451,11 @@ def find_longest_substring_in_suffix_trie(trie, node, string_so_far):
             if len(childstr) > len(longest):
                 longest = childstr
     return longest
+
+# 310-3
+def create_suffix_array(text):
+    from collections import OrderedDict
+    d = {}
+    for idx, suffix in enumerate(suffixes(text)):
+        d[suffix] = idx
+    return OrderedDict(sorted(d.items()))
