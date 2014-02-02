@@ -1468,3 +1468,35 @@ def bwt(string):
         matrix.append(rotated)
     matrix.sort()
     return ''.join([x[-1] for x in matrix])
+
+# 299-10
+def inv_bwt(last_col):
+    first_col = ''.join(sorted(last_col))
+    last_char_counts, first_char_counts, next_char = {}, {}, {}
+
+    for last_char, first_char in zip(last_col, first_col):
+        if last_char in last_char_counts:
+            last_char_count = last_char_counts[last_char] + 1
+        else:
+            last_char_count = 0
+
+        last_pair = (last_char, last_char_count)
+        last_char_counts[last_char] = last_char_count
+
+        if first_char in first_char_counts:
+            first_char_count = first_char_counts[first_char] + 1
+        else:
+            first_char_count = 0
+
+        first_pair = (first_char, first_char_count)
+        first_char_counts[first_char] = first_char_count
+
+        next_char[last_pair] = first_pair
+
+    result = ''
+    iter_pair = next_char[('$', 0)]
+    while iter_pair[0] != '$':
+        result += iter_pair[0]
+        iter_pair = next_char[iter_pair]
+
+    return result + '$'
