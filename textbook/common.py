@@ -1459,3 +1459,12 @@ def create_suffix_array(text):
     for idx, suffix in enumerate(suffixes(text)):
         d[suffix] = idx
     return OrderedDict(sorted(d.items()))
+
+# 297-4
+def bwt(string):
+    matrix = [string]
+    for i in range(len(string) - 1):
+        rotated = string[i+1:] + string[:i+1]
+        matrix.append(rotated)
+    matrix.sort()
+    return ''.join([x[-1] for x in matrix])
