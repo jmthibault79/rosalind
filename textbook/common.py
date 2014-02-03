@@ -1500,3 +1500,50 @@ def inv_bwt(last_col):
         iter_pair = next_char[iter_pair]
 
     return result + '$'
+
+# 300-8
+def bwt_matching(last_col, pattern):
+    first_col = ''.join(sorted(last_col))
+    last_char_counts, first_char_counts, first_col_row, last_to_first = {}, {}, {}, {}
+
+    for idx, first_char in enumerate(first_col):
+        if first_char in first_char_counts:
+            first_char_count = first_char_counts[first_char] + 1
+        else:
+            first_char_count = 0
+        first_char_counts[first_char] = first_char_count
+
+        first_pair = (first_char, first_char_count)
+        first_col_row[first_pair] = idx
+
+    for idx, last_char in enumerate(last_col):
+        if last_char in last_char_counts:
+            last_char_count = last_char_counts[last_char] + 1
+        else:
+            last_char_count = 0
+        last_char_counts[last_char] = last_char_count
+
+        last_pair = (last_char, last_char_count)
+        last_to_first[idx] = first_col_row[last_pair]
+
+    top, bottom = 0, len(last_col) - 1
+    while top <= bottom:
+        if pattern:
+            pattern, char = pattern[:-1], pattern[-1]
+            top_index, bottom_index = None, -1
+            found = False
+            for index in range(top, bottom + 1):
+                if last_col[index] == char:
+                    found = True
+                    if top_index == None:
+                        top_index = index
+                    if index > bottom_index:
+                        bottom_index = index
+
+            if found:
+                top = last_to_first[top_index]
+                bottom = last_to_first[bottom_index]
+            else:
+                return 0
+        else:
+            return bottom - top + 1
